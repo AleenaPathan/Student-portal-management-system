@@ -7,13 +7,16 @@ from sqlalchemy import or_ as db_or, and_, func, case
 import pandas as pd
 import os
 from functools import wraps
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'your-secret-key-change-in-production'
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key-change-in-production')
 
 jwt = JWTManager(app)
 db.init_app(app)
@@ -1011,4 +1014,5 @@ with app.app_context():
         print("Default users created successfully")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    debug = os.getenv('FLASK_ENV') == 'development'
+    app.run(debug=debug, host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
